@@ -22,7 +22,8 @@ dependencies = [
     "click>=8.1.6",
     "httpx>=0.27",
     "pydantic>=2.11",
-    "rubin-repertoire",
+    "rubin-gafaelfawr>=15.4.1",
+    "rubin-repertoire>=2.0.0",
     "structlog>=25",
 ]
 dynamic = ["version"]
@@ -41,9 +42,9 @@ build-backend = "setuptools.build_meta"
 [dependency-groups]
 dev = [
     "coverage[toml]",
-    "pyfakefs",
     "pytest",
     "pytest-asyncio",
+    "pytest-cov",
     "respx",
     "scriv[toml]",
 ]

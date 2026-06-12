@@ -1,8 +1,12 @@
 """Top-level collab-group metadata."""
 
-__all__ = ["__version__"]
-
 from importlib.metadata import PackageNotFoundError, version
+
+from .config import CollabGroupConfig
+from .executor import CollabGroupExecutor
+
+__all__ = ["CollabGroupConfig", "CollabGroupExecutor", "__version__"]
+
 
 __version__: str
 """The module version string (PEP 440 / SemVer compatible)."""
