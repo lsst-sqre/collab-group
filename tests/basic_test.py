@@ -27,5 +27,7 @@ async def test_basic(
     assert not (cl / "g_adhoc-3").exists()
     await executor.go()
     assert (cl / "g_adhoc-1").is_dir()
+    assert (cl / "g_adhoc-1").stat().st_mode & 0o7777 == 0o2775
     assert not (cl / "g_adhoc-2").exists()
     assert (cl / "g_adhoc-3").is_dir()
+    assert (cl / "g_adhoc-3").stat().st_mode & 0o7777 == 0o2775

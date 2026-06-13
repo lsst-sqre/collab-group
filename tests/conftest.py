@@ -92,7 +92,6 @@ async def collab_fs(
         tok_file.write_text(token)
         monkeypatch.setattr(os, "chown", _fake_chown)
         yield td
-    _ = 1
 
 
 @pytest_asyncio.fixture
@@ -102,4 +101,3 @@ async def collab_config(
     cfg_path = Path(collab_fs) / "config.yaml"
     config = yaml.safe_load(cfg_path.read_text())
     yield collab_group.CollabGroupConfig.model_validate(config)
-    _ = 1

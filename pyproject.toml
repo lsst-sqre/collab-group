@@ -8,7 +8,7 @@ readme = "README.md"
 keywords = ["rubin", "lsst"]
 # https://pypi.org/classifiers/
 classifiers = [
-    "Development Status :: 5 - Production/Stable",
+    "Development Status :: 4 - Beta",
     "Programming Language :: Python",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.14",
@@ -29,7 +29,7 @@ dependencies = [
 dynamic = ["version"]
 
 [project.scripts]
-builder = "collab_group.cli:main"
+collab-dir-builder = "collab_group.cli:main"
 
 [project.urls]
 Source = "https://github.com/lsst-sqre/collab-group"

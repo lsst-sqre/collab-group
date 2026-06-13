@@ -20,10 +20,9 @@ class CollabGroupExecutor:
 
     def __init__(self, config: CollabGroupConfig) -> None:
         self._logger = structlog.get_logger("collab_executor")
-        with config.gafaelfawr_token_path.open("r") as f:
-            self._token = yaml.safe_load(f)
+        self._token = config.gafaelfawr_token_path.read_text()
         with config.excluded_groups_path.open("r") as f:
-            self._exclude_groups = yaml.safe_load(f)
+            self._exclude_groups = set(yaml.safe_load(f) or [])
         self._collab_dir = config.collab_dir
         self._gafaelfawr_client = GafaelfawrClient(logger=self._logger)
         self._logger.info(
@@ -56,12 +55,16 @@ class CollabGroupExecutor:
                 self._logger.info(f"Skipping excluded group {gname}")
                 continue
             gdir = self._collab_dir / gname
-            if not gdir.exists():
-                self._logger.info(f"Creating {gdir!s}")
-                gdir.mkdir(mode=0o2775)
+            if not gdir.parent.is_dir():
+                raise RuntimeError(
+                    f"{gdir.parent!s} does not exist or is not a directory"
+                )
+            try:
+                gdir.mkdir(exist_ok=True)
                 uid = gdir.stat().st_uid
                 os.chown(gdir, uid, grp.id)
-            elif not gdir.is_dir():
-                self._logger.error(f"{gdir!s} exists but is not a directory")
-            else:
-                self._logger.debug(f"{gdir!s} already exists")
+                gdir.chmod(0o2775)
+            except FileExistsError:
+                self._logger.exception(
+                    f"{gdir!s} exists but is not a directory"
+                )
