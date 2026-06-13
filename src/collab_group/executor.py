@@ -25,6 +25,10 @@ class CollabGroupExecutor:
             self._exclude_groups = set(yaml.safe_load(f) or [])
         self._collab_dir = config.collab_dir
         self._gafaelfawr_client = GafaelfawrClient(logger=self._logger)
+        if not config.collab_dir.is_dir():
+            raise RuntimeError(
+                f"{config.collab_dir!s} does not exist or is not a directory"
+            )
         self._logger.info(
             f"Executor initialized with collab_dir={self._collab_dir}"
         )
@@ -55,16 +59,17 @@ class CollabGroupExecutor:
                 self._logger.info(f"Skipping excluded group {gname}")
                 continue
             gdir = self._collab_dir / gname
-            if not gdir.parent.is_dir():
-                raise RuntimeError(
-                    f"{gdir.parent!s} does not exist or is not a directory"
-                )
             try:
                 gdir.mkdir(exist_ok=True)
-                uid = gdir.stat().st_uid
+                # Set uid to effective userid.
+                # This will likely be "root", but if collab_dir is on NFS,
+                # the ownership on disk may end up "nobody" or "nfsnobody".
+                # collab_dir is likely to be NFS at Rubin Science Platform
+                # instances.
+                uid = os.geteuid()
                 os.chown(gdir, uid, grp.id)
                 gdir.chmod(0o2775)
             except FileExistsError:
-                self._logger.exception(
-                    f"{gdir!s} exists but is not a directory"
-                )
+                # Because we did mkdir(exist_ok=True), we will only ever get
+                # this error if the file exists and isn't a directory.
+                self._logger.error(f"{gdir!s} exists but is not a directory")

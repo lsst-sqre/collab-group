@@ -1,7 +1,7 @@
 [project]
 # https://packaging.python.org/en/latest/specifications/declaring-project-metadata/
 name = "collab-group"
-description = "Simulate user load for Science Platform testing"
+description = "Create and modify directories for ad-hoc collaboration"
 license = "MIT"
 license-files = ["LICENSE"]
 readme = "README.md"
@@ -144,6 +144,10 @@ extend = "ruff-shared.toml"
 [tool.ruff.lint.extend-per-file-ignores]
 "tests/data/**/*.ipynb" = [
     "T201",     # test notebooks are allowed to use print
+]
+
+"src/collab_group/executor.py" = [
+    "TRY400",   # The message is fine; a backtrace is excessive
 ]
 
 [tool.ruff.lint.isort]
