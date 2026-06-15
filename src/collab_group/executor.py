@@ -6,6 +6,7 @@ is prepared correctly for use.
 
 import os
 
+import safir.logging
 import structlog
 import yaml
 from rubin.gafaelfawr import GafaelfawrClient, GafaelfawrGroup
@@ -19,7 +20,8 @@ class CollabGroupExecutor:
     """Main class for doing directory scanning and creation."""
 
     def __init__(self, config: CollabGroupConfig) -> None:
-        self._logger = structlog.get_logger("collab_executor")
+        safir.logging.configure_logging(name="collab-group")
+        self._logger = structlog.get_logger("collab-group")
         self._token = config.gafaelfawr_token_path.read_text()
         with config.excluded_groups_path.open("r") as f:
             self._exclude_groups = set(yaml.safe_load(f) or [])

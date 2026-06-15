@@ -210,6 +210,7 @@ dependencies = [
     { name = "pydantic" },
     { name = "rubin-gafaelfawr" },
     { name = "rubin-repertoire" },
+    { name = "safir-logging" },
     { name = "structlog" },
 ]
 
@@ -242,6 +243,7 @@ requires-dist = [
     { name = "pydantic", specifier = ">=2.11" },
     { name = "rubin-gafaelfawr", specifier = ">=15.4.1" },
     { name = "rubin-repertoire", specifier = ">=2.0.0" },
+    { name = "safir-logging", specifier = ">=15.1.1" },
     { name = "structlog", specifier = ">=25" },
 ]
 
