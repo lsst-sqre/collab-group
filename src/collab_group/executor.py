@@ -8,7 +8,6 @@ import os
 
 import safir.logging
 import structlog
-import yaml
 from rubin.gafaelfawr import GafaelfawrClient, GafaelfawrGroup
 
 from .config import CollabGroupConfig
@@ -22,15 +21,14 @@ class CollabGroupExecutor:
     def __init__(self, config: CollabGroupConfig) -> None:
         safir.logging.configure_logging(name="collab-group")
         self._logger = structlog.get_logger("collab-group")
-        self._token = config.gafaelfawr_token_path.read_text()
-        with config.excluded_groups_path.open("r") as f:
-            self._exclude_groups = set(yaml.safe_load(f) or [])
         self._collab_dir = config.collab_dir
-        self._gafaelfawr_client = GafaelfawrClient(logger=self._logger)
         if not config.collab_dir.is_dir():
             raise RuntimeError(
                 f"{config.collab_dir!s} does not exist or is not a directory"
             )
+        self._token = config.gafaelfawr_token_path.read_text()
+        self._excluded_groups = set(config.excluded_groups or [])
+        self._gafaelfawr_client = GafaelfawrClient(logger=self._logger)
         self._logger.info(
             f"Executor initialized with collab_dir={self._collab_dir}"
         )
@@ -52,23 +50,24 @@ class CollabGroupExecutor:
         We use mkdir(parents=True) rather than checking existence because
         the latter would introduce a race condition.
 
-        Set its permissions to have sgid set (so further dirs created
-        have the same ownership) and be group-writeable.  This has the side
-        effect of resetting the top-level group permission and sgid if it
-        has gotten changed since creation, but it should not have gotten
-        changed.
-
         Change the group ownership so it's owned by the corresponding group.
+
+        Set its permissions to have sgid set (so further dirs created
+        have the same ownership) and be group-writeable.
+
+        This has the side effect of resetting the top-level group
+        permission and sgid if it has gotten changed since creation,
+        but if it got changed, that was a mistake.
         """
         for grp in groups:
             gname = grp.name
-            if gname in self._exclude_groups:
+            if gname in self._excluded_groups:
                 self._logger.info(f"Skipping excluded group {gname}")
                 continue
             gdir = self._collab_dir / gname
             try:
                 gdir.mkdir(exist_ok=True)
-                # UID -1 means "don't change it".
+                # UID -1 means "don't change UID".
                 os.chown(gdir, -1, grp.id)
                 gdir.chmod(0o2775)
             except FileExistsError:
