@@ -29,5 +29,5 @@ service runs.
 GAFAELFAWR_TOKEN_PATH = Path("/etc/gafaelfawr/token")
 """Path to Gafaelfawr token.
 
-This token must have administrative scope in order to list groups.
+This token must have 'admin:userinfo' scope in order to list groups.
 """
