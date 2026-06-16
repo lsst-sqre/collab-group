@@ -38,8 +38,8 @@ class CollabGroupExecutor:
     async def go(self) -> None:
         """Check, create, change permissions and ownerships on directories.
 
-        Get the list of groups to check, and then pass that to the filesystem
-        driver to make and modify directories.
+        Get the list of groups to check, and then make the directory for
+        each one.
         """
         groups = await self._gafaelfawr_client.list_groups(self._token)
         self._logger.info(f"Checking directories in {self._collab_dir}")
@@ -49,11 +49,16 @@ class CollabGroupExecutor:
     async def _make_dirs(self, groups: list[GafaelfawrGroup]) -> None:
         """Create a directory for each group, if it doesn't already exist.
 
+        We use mkdir(parents=True) rather than checking existence because
+        the latter would introduce a race condition.
+
         Set its permissions to have sgid set (so further dirs created
-        have the same ownership) and be group-writeable.
+        have the same ownership) and be group-writeable.  This has the side
+        effect of resetting the top-level group permission and sgid if it
+        has gotten changed since creation, but it should not have gotten
+        changed.
 
         Change the group ownership so it's owned by the corresponding group.
-
         """
         for grp in groups:
             gname = grp.name
@@ -63,13 +68,8 @@ class CollabGroupExecutor:
             gdir = self._collab_dir / gname
             try:
                 gdir.mkdir(exist_ok=True)
-                # Set uid to effective userid.
-                # This will likely be "root", but if collab_dir is on NFS,
-                # the ownership on disk may end up "nobody" or "nfsnobody".
-                # collab_dir is likely to be NFS at Rubin Science Platform
-                # instances.
-                uid = os.geteuid()
-                os.chown(gdir, uid, grp.id)
+                # UID -1 means "don't change it".
+                os.chown(gdir, -1, grp.id)
                 gdir.chmod(0o2775)
             except FileExistsError:
                 # Because we did mkdir(exist_ok=True), we will only ever get
