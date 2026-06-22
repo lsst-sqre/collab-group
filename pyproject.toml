@@ -24,6 +24,7 @@ dependencies = [
     "pydantic>=2.11",
     "rubin-gafaelfawr>=15.4.1",
     "rubin-repertoire>=2.0.0",
+    "safir-logging>=15.1.1",
     "structlog>=25",
 ]
 dynamic = ["version"]

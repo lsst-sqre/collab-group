@@ -29,7 +29,7 @@ GROUPS = GafaelfawrGroups(
         for x in json.loads((DATA / "groups.json").read_text())
     ],
 )
-EXCLUDE_GROUPS = yaml.safe_load((DATA / "exclude-groups.yaml").read_text())
+EXCLUDED_GROUPS = ["g_adhoc-2"]
 
 
 @pytest.fixture
@@ -75,14 +75,12 @@ async def collab_fs(
     with TemporaryDirectory() as td:
         tpath = Path(td)
         collab_dir = tpath / "collab"
-        exc_file = tpath / "exclude-groups.yaml"
         cfg_file = tpath / "config.yaml"
         tok_file = tpath / "gafaelfawr-token"
         collab_dir.mkdir()
-        exc_file.write_text(yaml.dump(EXCLUDE_GROUPS))
         config = {
             "collabDir": str(collab_dir),
-            "excludedGroupsPath": str(exc_file),
+            "excludedGroups": EXCLUDED_GROUPS,
             "gafaelfawrTokenPath": str(tok_file),
         }
         cfg_file.write_text(yaml.dump(config))

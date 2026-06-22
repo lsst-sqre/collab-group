@@ -6,7 +6,7 @@ from typing import Annotated
 from pydantic import BaseModel, ConfigDict, Field
 from pydantic.alias_generators import to_camel
 
-from .constants import COLLAB_DIR, EXCLUDED_GROUPS_PATH, GAFAELFAWR_TOKEN_PATH
+from .constants import COLLAB_DIR, GAFAELFAWR_TOKEN_PATH
 
 __all__ = ["CollabGroupConfig"]
 
@@ -27,21 +27,22 @@ class CollabGroupConfig(BaseModel):
         ),
     ] = COLLAB_DIR
 
-    excluded_groups_path: Annotated[
-        Path,
+    excluded_groups: Annotated[
+        list[str] | None,
         Field(
-            title="File specifying excluded groups",
-            description="YAML file specifying excluded groups",
-            examples=[EXCLUDED_GROUPS_PATH],
+            title="Excluded groups",
+            description="List of groups to not create directories for",
+            examples=[["g_adhoc-2"]],
         ),
-    ] = EXCLUDED_GROUPS_PATH
+    ] = None
 
     gafaelfawr_token_path: Annotated[
         Path,
         Field(
             title="File containing Gafaelfawr token",
             description=(
-                "File containing Gafaelfawr admin token to query groups"
+                "File containing Gafaelfawr token with 'admin:userinfo'"
+                " scope to query groups"
             ),
             examples=[GAFAELFAWR_TOKEN_PATH],
         ),
